@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "./ownable.sol";
 
-contract ZombieFactory is Ownable{
+contract ZombieFactory is Ownable {
 
     event NewZombie(uint zombieId, string name, uint dna);
 
@@ -11,34 +11,44 @@ contract ZombieFactory is Ownable{
     uint dnaModulus = 10 ** dnaDigits;
     uint cooldownTime = 1 days;
 
-    struct Zombie{
+    struct Zombie {
         string name;
         uint dna;
         uint32 level;
         uint32 readyTime;
+        uint16 winCount;
+        uint16 lossCount;
     }
 
     Zombie[] public zombies;
 
-    function createZombie(string memory _name, uint _dna) internal {
-        uint id = zombies.length;
-        zombies.push(Zombie(_name, _dna, 1, uint32(block.timestamp + cooldownTime)));
-        emit NewZombie(id, _name, _dna);
+    mapping (uint => address) public zombieToOwner;
+    mapping (address => uint) ownerZombieCount;
+
+    function _createZombie(string memory _name, uint _dna) internal {
+        zombies.push(Zombie(_name, _dna, 1, uint32(block.timestamp + cooldownTime), 0, 0));
+        uint id = zombies.length - 1;
         zombieToOwner[id] = msg.sender;
-        ownerZombieCount[msg.sender] ++;
+        ownerZombieCount[msg.sender] += 1;
+        emit NewZombie(id, _name, _dna);
     }
 
-    function _generateRandomDna(string memory _str) private view returns (uint){
+    function _generateRandomDna(string memory _str) private view returns (uint) {
         uint rand = uint(keccak256(abi.encodePacked(_str)));
         return rand % dnaModulus;
     }
 
-    function createRandomZombie(string memory _name) public{
+    function createRandomZombie(string memory _name) public {
         require(ownerZombieCount[msg.sender] == 0);
         uint randDna = _generateRandomDna(_name);
-        createZombie(_name, randDna);
+        _createZombie(_name, randDna);
     }
 
-    mapping (uint => address) public zombieToOwner;
-    mapping (address => uint) public ownerZombieCount;
+    function _triggerCooldown(Zombie storage _zombie) internal {
+        _zombie.readyTime = uint32(block.timestamp + cooldownTime);
+    }
+
+    function _isReady(Zombie storage _zombie) internal view returns (bool) {
+        return (_zombie.readyTime <= block.timestamp);
+    }
 }
