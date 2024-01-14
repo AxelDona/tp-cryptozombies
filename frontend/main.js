@@ -1,7 +1,6 @@
 import "./style.css";
-import {createPublicClient, http, getContract, createWalletClient, custom} from "viem";
+import {createPublicClient, http, getContract, createWalletClient, custom, parseEther} from "viem";
 import { goerli } from "viem/chains";
-// import { UNI } from "./abi/UNI";
 import { CryptoZombies } from './abi/CryptoZombies';
 
 // Client settings
@@ -18,32 +17,6 @@ const walletClient = createWalletClient({
     chain: goerli,
     transport: custom(window.ethereum),
 });
-
-// UNI Transaction
-/*
-const blockNumber = await publicClient.getBlockNumber();
-
-const unwatch = publicClient.watchBlockNumber(
-    { onBlockNumber: blockNumber => document.querySelector("#blockNumber").innerHTML = blockNumber }
-)
-
-const uniContract = getContract({
-    address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", // UNI address
-    abi: UNI,
-    publicClient,
-    walletClient, // additional argument here
-});
-
-const decimals = await uniContract.read.decimals();
-const symbol = await uniContract.read.symbol();
-const name = await uniContract.read.name();
-const totalSupply = await uniContract.read.totalSupply();
-const balance = formatUnits(await uniContract.read.balanceOf(["0x42290ecB516460b11D94AF194aC5ce1f89b1aa34"]), decimals);
-
-await uniContract.write.transfer(["0x42290ecB516460b11D94AF194aC5ce1f89b1aa34", 1n]);
-*/
-
-// Cryptozombies
 
 
 const zombieContract = getContract({
@@ -66,6 +39,7 @@ const getAllZombies = async () => {
             const zombie = await zombieContract.read.zombies([count]);
             allZombies.push(zombie);
             count++;
+            console.log(zombie)
         } catch (error) {
             break;
         }
@@ -76,8 +50,7 @@ const getAllZombies = async () => {
 const updateZombiesList = async () => {
     const allZombiesData = await getAllZombies();
     allZombiesList.innerHTML = allZombiesData
-        .map((zombie) => `<li class="allZombieCard">${zombie.map((data) => `<p>${data}</p>`).join('')}</li>`)
-        .join('');
+        .map((zombie) => `<li class="allZombieCard"><p>${zombie[0]}</p></li>`);
 };
 
 updateZombiesList();
@@ -85,58 +58,39 @@ updateZombiesList();
 
 document.querySelector("#app").innerHTML = `
   <div>
-  <!--
-    <p>Current block is <span id="blockNumber">${blockNumber}</span></p>
-    <h1>${symbol}</h1>
-    <p>Name : ${name}</p>
-    <p>Address : <a href="https://goerli.etherscan.io/token/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984" target="_blank">0x1f9840a85d5af5bf1d1762f925bdaddc4201f984</a></p>
-    <p>Total supply : ${totalSupply}</p>
-    <p>Balance of 0x42290ecB516460b11D94AF194aC5ce1f89b1aa34 : ${balance}</p>
-    <hr>
-    <div>
-        <span>Amount : </span>
-        <input type="text" id="amountInput" value="0">
-        <button id="maxButton">Max</button>
-    </div>
-    <div>
-        <span>Recipient : </span>
-        <input type="text" id="recipientInput" placeholder="0x...">
-        <button id="sendButton">Send</button>
-    </div>
-    -->
     <span id="blockNumber">Current block is ${blockNumber}</span>
     <p>Contract owner : ${await zombieContract.read.owner()}</p>
+    <p id="balance">Zombie count of <b>${await [account]}</b> : ${zombieCount}</p>
+    <hr>
+    <h2>Create a new zombie</h2>
     <div id="creation">
       <p>Zombie name : <input id="zombieName"></p>
       <button id="createZombie">Create</button>
     </div>
-    <p id="balance">Zombie count of <b>${await [account]}</b> : ${zombieCount}</p>
-    <p>My zombies :</p>
-    <div id="zombieCard">
+    <hr>
+    <h2>My zombies</h2>
+    <div class="zombieCard">
+      <div class="zombieCardHeader">
+       <div class="zombieCardHeaderTitle">
+        <h4 >${await zombieData[0]}</h4>
+        <span>Level ${await zombieData[2]}</span>
+       </div>
+       <button id="levelUp">Level Up!</button>
+      </div>
       <ul>
-        ${await zombieData.map(data => `<li>${data}</li>`).join('\n')}
+        <li><strong>DNA</strong>${await zombieData[1]}</li>
+        <li><strong>ReadyTime</strong>${await zombieData[3]}</li>
+        <li><strong>Wins</strong>${await zombieData[4]}</li>
+        <li><strong>Losses</strong>${await zombieData[5]}</li>
       </ul>
     </div>
-    <button id="levelUp">Level up</button>
-    <p>All zombies :</p>
+    <hr>
+    <h2>All zombies</h2>
     <div id="allZombies">
       <ul id="allZombiesList"></ul>
     </div>
   </div>
 `;
-
-/*
-document.querySelector("#maxButton").addEventListener("click", () => {
-    document.querySelector("#amountInput").value = balance;
-});
-
-document.querySelector("#sendButton").addEventListener("click", async () => {
-    const amount = parseUnits(document.querySelector("#amountInput").value, decimals);
-    const recipient = document.querySelector("#recipientInput").value;
-    await uniContract.write.transfer([recipient, amount]);
-});
-
- */
 
 document.querySelector("#createZombie").addEventListener("click", async () => {
     const name = document.querySelector("#zombieName").value;

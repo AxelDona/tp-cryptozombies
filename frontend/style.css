@@ -11,6 +11,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 }
 
 a {
@@ -92,5 +93,70 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+    border: 1px solid #333333;
   }
+}
+
+.zombieCard {
+  margin-bottom: 16px;
+}
+
+.zombieCard, .allZombieCard {
+  border: 1px solid black;
+}
+
+.zombieCardHeader{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.zombieCardHeader button{
+  margin: 2em;
+}
+
+.zombieCardHeaderTitle{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.zombieCard ul{
+  text-align: left;
+  margin-left: 2em;
+  margin-bottom: 2em;
+}
+
+.zombieCard ul strong{
+  margin-right: 1em;
+}
+
+.zombieCardHeader h4{
+  margin: 1em;
+  font-weight: 800;
+  font-size: 26px;
+}
+
+.allZombieCard {
+  margin-bottom: 16px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li p {
+  margin: 0;
+}
+
+.allZombieCard {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+#creation{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
